@@ -47,3 +47,10 @@ def message():
 @app.get('/movies',tags=['movies'])
 def get_movies():
     return movies
+
+@app.get('/movies/{id}',tags=['movies'])
+def get_movie(id:int):
+    for item in movies:
+        if item['id']==id:
+            return item
+    return []
