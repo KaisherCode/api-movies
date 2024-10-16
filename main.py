@@ -1,6 +1,6 @@
-from fastapi import FastAPI,Body
+from fastapi import FastAPI,Path,Query
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
 from typing import Optional
 
 app = FastAPI()
@@ -9,11 +9,26 @@ app.version = "0.0.1"
 
 class Movie(BaseModel):
     id: Optional[int]=None
-    title: str
-    overview: str
-    year: int
-    rating: float
-    category: str
+    title: str = Field(min_length=5,max_length=15)
+    overview: str = Field(min_length=15,max_length=50)
+    year: int = Field(le=2024)
+    rating: float = Field(ge=1,le=10)
+    category: str = Field(min_length=10,max_length=25)
+    
+    class Config:
+        json_schema_extra={
+            'example':[
+               {
+                'id': 1,
+                'title':'Mi película Dev',
+                'overview': 'Decripción de la película',
+                'year': 2024,
+                'rating': 9.8,
+                'category': 'Acction'
+            } 
+            ]
+            
+        }
     
 
 movies = [
@@ -68,14 +83,14 @@ def get_movies():
     return movies
 
 @app.get('/movies/{id}',tags=['movies'])
-def get_movie_by_id(id:int):
+def get_movie_by_id(id:int=Path(ge=1,le=2000)):
     for item in movies:
         if item['id']==id:
             return item
     return []
 
 @app.get('/movies/',tags=['movies'])
-def filter_movies_by_category(category:str,year:int):
+def filter_movies_by_category(category:str=Query(min_length=5,max_length=25)):
     return [item for item in movies if item['category']==category]
 
 @app.post('/movies',tags=['movies'])
