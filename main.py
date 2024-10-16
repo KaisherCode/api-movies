@@ -12,7 +12,7 @@ movies = [
         "overview":"En un exuberante planeta llamado pandora viven lso Navi",
         "year":"2009",
         "rating":"7.8",
-        "category":"Acción",
+        "category":"Action",
     },
     {
     "id": 2,
@@ -37,6 +37,14 @@ movies = [
     "year": 1972,
     "rating": 9.2,
     "category": "Crime, Drama"
+  },
+  {
+    "id": 5,
+    "title": "El secreto de sus ojos",
+    "overview": "No se llevó, de manera incomprensible e injustísima, el máximo galardón del reciente Festival de San Sebastián, pero da lo mismo.",
+    "year": 2009,
+    "rating": 8.9,
+    "category": "Action"
   }
 ]
 
@@ -69,3 +77,13 @@ def create_movies(id:int=Body(),title:str=Body(),overview:str=Body(),year:int=Bo
         "category":category,
     })
     return movies
+
+@app.put('/movies/{id}',tags=['movies'])
+def update_movie(id: int,title: str=Body(),overview:str=Body(),year:int=Body(),category:str=Body()):
+    for item in movies:
+        if item['id']==id:
+            item['title']=title,
+            item['overview']=overview,
+            item['year']=year,
+            item['category']=category,
+            return movies
