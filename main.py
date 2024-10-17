@@ -2,10 +2,15 @@ from fastapi import FastAPI,Body,Path,Query
 from fastapi.responses import HTMLResponse,JSONResponse
 from pydantic import BaseModel,Field,ConfigDict
 from typing import Optional,List
+from jwt_manager import create_token
 
 app = FastAPI()
 app.title = "My FastAPI"
 app.version = "0.0.1"
+
+class User(BaseModel):
+    email: str
+    password: str
 
 class Movie(BaseModel):
     id: Optional[int]=None
@@ -76,6 +81,14 @@ movies = [
 def message():
     return HTMLResponse('<h1>Hola Mundo!<h1/>')
 
+# Login
+
+@app.post('/login',tags=['auth'])
+def login(user:User):
+    if user.email=="admin@gmail.com" and user.password=="admin":
+        token:str=create_token(user.dict())
+        return JSONResponse(status_code=200,content=token)  
+
 @app.get('/movies',tags=['movies'],response_model=List[Movie],status_code=200)
 def get_movies()->List[Movie]:
     return JSONResponse(status_code=200,content=movies)
@@ -114,5 +127,5 @@ def delete_movie(id:int)->dict:
         if item['id']==id:
             movies.remove(item)
             return JSONResponse(status_code=200,content={'message':'Se ha eliminado la película.'})
-        
-        
+
+
