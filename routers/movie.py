@@ -11,9 +11,6 @@ from schemas.movie import Movie
 
 movie_router = APIRouter()
 
-
-
-
 @movie_router.get('/movies',tags=['movies'],response_model=List[Movie],status_code=200,dependencies=[Depends(JWTBearer())])
 def get_movies()->List[Movie]:
     db = Session()
@@ -45,17 +42,12 @@ def create_movies(movie:Movie)->dict:
 @movie_router.put('/movies/{id}',tags=['movies'],response_model=dict,status_code=200)
 def update_movie(id:int,movie:Movie)->dict:
     db = Session()
-    result = db.query(MovieModel).filter(MovieModel.id==id).first()
+    result = MovieService(db).get_movie_by_id(id)
     if not result:
         return JSONResponse(status_code=404,content={"message":"Id no encontrado, ingrese un id válido"})
-    result.title = movie.title
-    result.overview = movie.overview
-    result.year = movie.year
-    result.rating = movie.rating
-    result.category = movie.category
-    db.commit()
+    MovieService(db).update_movie(id,movie)
     return JSONResponse(status_code=200,content={"message":"Se ha actualizado la película."})
-        
+
 @movie_router.delete('/movies/{id}',tags=['movies'],response_model=dict,status_code=200)
 def delete_movie(id:int)->dict:
     db = Session()
