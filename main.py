@@ -6,6 +6,7 @@ from jwt_manager import create_token,validate_token
 from fastapi.security import HTTPBearer
 from config.database import Session,engine,Base
 from models.movie import Movie as MovieModel
+from fastapi.encoders import jsonable_encoder
 
 app = FastAPI()
 app.title = "My FastAPI"
@@ -28,7 +29,7 @@ class User(BaseModel):
 class Movie(BaseModel):
     id: Optional[int]=None
     title: str = Field(min_length=5,max_length=15)
-    overview: str = Field(min_length=15,max_length=100)
+    overview: str = Field(min_length=15,max_length=200)
     year: int = Field()
     rating: float = Field(ge=1,le=10)
     category: str = Field(min_length=5,max_length=25)
@@ -104,14 +105,17 @@ def login(user:User):
 
 @app.get('/movies',tags=['movies'],response_model=List[Movie],status_code=200,dependencies=[Depends(JWTBearer())])
 def get_movies()->List[Movie]:
-    return JSONResponse(status_code=200,content=movies)
+    db = Session()
+    result = db.query(MovieModel).all()
+    return JSONResponse(status_code=200,content=jsonable_encoder(result))
 
 @app.get('/movies/{id}',tags=['movies'],response_model=Movie)
 def get_movie_by_id(id:int=Path(ge=1,le=2000))->Movie:
-    for item in movies:
-        if item['id']==id:
-            return JSONResponse(status_code=200,content=item)
-    return JSONResponse(status_code=404,content=[])
+    db = Session()
+    result = db.query(MovieModel).filter(MovieModel.id==id).first()
+    if not result:
+        return JSONResponse(status_code=404,content={"message":"Movie no encontrado"})
+    return JSONResponse(status_code=200,content=jsonable_encoder(result))
 
 @app.get('/movies/',tags=['movies'],response_model=List[Movie])
 def filter_movies_by_category(category:str=Query(min_length=5,max_length=25))->List[Movie]:
