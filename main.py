@@ -23,7 +23,7 @@ class User(BaseModel):
 
 class Movie(BaseModel):
     id: Optional[int]=None
-    title: str = Field(min_length=5,max_length=15)
+    title: str = Field(min_length=5,max_length=25)
     overview: str = Field(min_length=15,max_length=200)
     year: int = Field()
     rating: float = Field(ge=1,le=10)
