@@ -119,8 +119,11 @@ def get_movie_by_id(id:int=Path(ge=1,le=2000))->Movie:
 
 @app.get('/movies/',tags=['movies'],response_model=List[Movie])
 def filter_movies_by_category(category:str=Query(min_length=5,max_length=25))->List[Movie]:
-    data=[item for item in movies if item['category']==category]
-    return JSONResponse(content=data)
+    db = Session()
+    result = db.query(MovieModel).filter(MovieModel.category==category).all()
+    if not result:
+        return JSONResponse(status_code=404,content={"message":"Categoria no encontrado"})
+    return JSONResponse(status_code=200,content=jsonable_encoder(result))
 
 @app.post('/movies',tags=['movies'],response_model=dict,status_code=201)
 def create_movies(movie:Movie)->dict:
