@@ -1,6 +1,4 @@
 from fastapi import FastAPI
-import uvicorn
-from os import getenv
 from fastapi.responses import HTMLResponse
 from config.database import engine,Base
 from middlewares.error_handler import ErrorHandler
@@ -20,10 +18,6 @@ Base.metadata.create_all(bind=engine)
 @app.get('/',tags=['home'])
 def message():
     return HTMLResponse('<h1>Hola Mundo!<h1/>')
-
-if __name__=="__main__":
-    port = int(getenv("PORT",8000))
-    uvicorn.run("main:app",host="0.0.0.0",port=port,reload=True)
 
 
 
